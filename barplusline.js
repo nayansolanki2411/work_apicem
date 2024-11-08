@@ -17,13 +17,21 @@ looker.plugins.visualizations.add({
   },
   create: function (element, config) {
     element.innerHTML = "";
-    this.chart = document.createElement("div");
+    this.chart = document.createElement("canvas"); // Create canvas instead of div for Chart.js
     element.appendChild(this.chart);
   },
   updateAsync: function (data, element, config, queryResponse, details, done) {
-    const categories = data.map(row => row[queryResponse.fields.dimensions[0].name].value);
-    const barValues = data.map(row => row[queryResponse.fields.measures[0].name].value);
-    const lineValues = data.map(row => row[queryResponse.fields.measures[1].name].value);
+    console.log('Data:', data); // Log data to check what’s being returned
+    const categories = data.map(row => row[queryResponse.fields.dimensions[0].name]?.value);
+    const barValues = data.map(row => row[queryResponse.fields.measures[0].name]?.value);
+    const lineValues = data.map(row => row[queryResponse.fields.measures[1].name]?.value);
+
+    // Check if values are empty or undefined
+    if (categories.length === 0 || barValues.length === 0 || lineValues.length === 0) {
+      console.error('Error: Empty data arrays');
+      done(); // Exit if data is empty
+      return;
+    }
 
     const chartData = {
       labels: categories,
@@ -76,14 +84,14 @@ looker.plugins.visualizations.add({
 
     const ctx = this.chart.getContext("2d");
     if (this.chartInstance) {
-      this.chartInstance.destroy();
+      this.chartInstance.destroy(); // Destroy previous chart instance
     }
     this.chartInstance = new Chart(ctx, {
       type: "bar",
       data: chartData,
       options: options
     });
-    
-    done();
+
+    done(); // Notify Looker that rendering is complete
   }
 });
