@@ -16,22 +16,26 @@ looker.plugins.visualizations.add({
     }
   },
   create: function (element, config) {
+    // Clear any existing content
     element.innerHTML = "";
-    this.chart = document.createElement("canvas"); // Create canvas for Chart.js
-    element.appendChild(this.chart);
+    this.chartContainer = document.createElement("div");
+    element.appendChild(this.chartContainer);
   },
   updateAsync: function (data, element, config, queryResponse, details, done) {
+    console.log("Data:", data);
+
+    // Ensure data is available
     const categories = data.map(row => row[queryResponse.fields.dimensions[0].name]?.value);
     const barValues = data.map(row => row[queryResponse.fields.measures[0].name]?.value);
     const lineValues = data.map(row => row[queryResponse.fields.measures[1].name]?.value);
 
-    // Check for empty data
-    if (categories.length === 0 || barValues.length === 0 || lineValues.length === 0) {
-      console.error('Error: Empty data arrays');
+    if (!categories.length || !barValues.length || !lineValues.length) {
+      console.error("Error: Empty data arrays");
       done();
       return;
     }
 
+    // Prepare data for charting
     const chartData = {
       labels: categories,
       datasets: [
@@ -58,33 +62,30 @@ looker.plugins.visualizations.add({
           {
             type: "linear",
             position: "left",
-            ticks: {
-              beginAtZero: true
-            },
-            scaleLabel: {
-              display: true,
-              labelString: "Bar Data Axis"
-            }
+            ticks: { beginAtZero: true },
+            scaleLabel: { display: true, labelString: "Bar Data Axis" }
           },
           {
             type: "linear",
             position: "right",
-            ticks: {
-              beginAtZero: true
-            },
-            scaleLabel: {
-              display: true,
-              labelString: "Line Data Axis"
-            }
+            ticks: { beginAtZero: true },
+            scaleLabel: { display: true, labelString: "Line Data Axis" }
           }
         ]
       }
     };
 
-    const ctx = this.chart.getContext("2d");
+    // Create canvas for chart rendering
+    const canvas = document.createElement("canvas");
+    this.chartContainer.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+
+    // Destroy previous instance if exists
     if (this.chartInstance) {
-      this.chartInstance.destroy(); // Destroy previous chart instance
+      this.chartInstance.destroy();
     }
+
+    // Initialize Chart.js
     this.chartInstance = new Chart(ctx, {
       type: "bar",
       data: chartData,
