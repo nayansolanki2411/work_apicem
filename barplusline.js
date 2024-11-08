@@ -2,19 +2,20 @@ looker.plugins.visualizations.add({
   id: "bar_plus_line_chart",
   label: "Bar Plus Line Chart",
   options: {
-    bar_color: {
-      type: "string",
-      label: "Bar Color",
-      display: "color",
-      default: "#1f77b4"
-    },
-    line_color: {
-      type: "string",
-      label: "Line Color",
-      display: "color",
-      default: "#ff7f0e"
-    }
+  bar_color: {
+    type: "string",
+    label: "Bar Color",
+    display: "color",
+    default: "#1f77b4"
   },
+  line_color: {
+    type: "string",
+    label: "Line Color",
+    display: "color",
+    default: "#ff7f0e"
+  }
+}
+,
   create: function (element, config) {
     element.innerHTML = "";
     this.chart = document.createElement("canvas"); // Create canvas instead of div for Chart.js
